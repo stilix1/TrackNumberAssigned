@@ -4,6 +4,21 @@
 require_once 'twilio_whatsapp.php';
 require_once 'telegramAPI.php';
 
+// Подключение к базе данных (замените на свой код подключения)
+$db_connection = new PDO("mysql:host=localhost;dbname=database", "username", "password");
+
+// Получение номера телефона пользователя по его ID
+function get_user_phone_number($user_id) {
+    global $db_connection;
+
+    $query = "SELECT phone_number FROM users WHERE user_id = :user_id";
+    $stmt = $db_connection->prepare($query);
+    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt->execute();
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $row['phone_number'];
+}
 
 /**
  * Отправляет уведомление о статусе "Присвоен трек-номер" мерчанту через мессенджер (WhatsApp или Telegram).
@@ -11,7 +26,7 @@ require_once 'telegramAPI.php';
  * @param int $order_id Номер заказа, для которого изменяется статус.
  * @param string $phone_number Номер телефона мерчанта.
  */
-function send_track_number_assigned_status($order_id, $phone_number) {
+function send_track_number_assigned_status(int $order_id, string $phone_number) {
     // Формируем сообщение о статусе заказа
     $message = "Статус заказа $order_id изменен на 'Присвоен трек-номер'. Накладная на отправку находится в вашем личном кабинете, в заказе, раздел 'Прикрепленные файлы'.";
 
